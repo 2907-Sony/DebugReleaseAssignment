@@ -8,8 +8,8 @@ struct STUDENT_DATA
 {
     std::string firstName;
     std::string lastName;
+    std::string email;
 };
-
 
 int main()
 {
@@ -28,8 +28,12 @@ int main()
         std::stringstream ss(line);
         std::string first, last;
 
-        std::getline(ss, first, ',');
-        std::getline(ss, last, ',');
+
+         std::getline(ss, first, ',');
+         std::getline(ss, last, ',');
+
+        if (!last.empty() && last[0] == ' ')
+            last.erase(0, 1);
 
         STUDENT_DATA student;
         student.firstName = first;
@@ -40,11 +44,55 @@ int main()
 
     inputFile.close();
 
+#ifdef PRE_RELEASE
+    std::cout << "Running PRE-RELEASE version." << std::endl;
+
+    std::ifstream emailFile("StudentData_Emails.txt");
+    if (emailFile.is_open())
+    {
+        std::string emailLine;
+        while (std::getline(emailFile, emailLine))
+        {
+            std::stringstream ess(emailLine);
+            std::string eLast, eFirst, email;
+
+            std::getline(ess, eLast, ',');
+            std::getline(ess, eFirst, ',');
+            std::getline(ess, email, ',');
+
+            // trim leading space that follows the comma
+            if (!eFirst.empty() && eFirst[0] == ' ')
+                eFirst.erase(0, 1);
+
+            for (auto& s : students)
+            {
+                if (s.firstName == eLast && s.lastName == eFirst)
+                {
+                    s.email = email;
+                    break;
+                }
+            }
+        }
+        emailFile.close();
+    }
+    else
+    {
+        std::cout << "Error: Could not open StudentData_Emails.txt" << std::endl;
+    }
+#else
+    std::cout << "Running STANDARD version." << std::endl;
+#endif
+
 #ifdef _DEBUG
     std::cout << "=== DEBUG MODE: Student List ===" << std::endl;
     for (const auto& s : students)
     {
-        std::cout << s.firstName << " " << s.lastName << std::endl;
+        std::cout << s.firstName << " " << s.lastName;
+        if (!s.email.empty())
+        {
+            std::cout << " - " << s.email;
+        }
+        std::cout << std::endl;
     }
 #endif
 
